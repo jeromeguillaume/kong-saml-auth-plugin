@@ -34,11 +34,14 @@ func (conf Config) Access(kong *pdk.PDK) {
 		log.Printf("Error reading 'host' header: %s", err.Error())
 	}
 
-	kong.ServiceRequest.AddHeader("x-jerome","test")
+	// Add a header in the request before the call of Backend
+	kong.ServiceRequest.AddHeader("x-saml-auth-req","test")
 
 	message := conf.Message
 	if message == "" {
 		message = "hello"
 	}
-	kong.Response.SetHeader("x-hello-from-go", fmt.Sprintf("Go says %s to %s", message, host))
+	
+	// Add a header in the response sent to the Consumer
+	kong.Response.SetHeader("x-saml-auth-res", fmt.Sprintf("Go says %s to %s", message, host))
 }
