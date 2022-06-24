@@ -8,7 +8,7 @@ The purpose of this plugn is to:
 See example below with the Endpoint http://httpbin.org/anything
 ![manager](./image/saml-auth-plugin-result.png)
 
-## Prepare Kong environment : Docker network and PostgreSQL (start & prepare PostgreSQL)
+## Prepare Kong environment : Docker network,  PostgreSQL (start & prepare PostgreSQL) and License
 1) Create a custom Docker network to allow the containers to discover and communicate with each other
 ``` 
 docker network create kong-net
