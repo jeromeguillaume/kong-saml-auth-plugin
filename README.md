@@ -47,5 +47,8 @@ Start Kong Gateway
 ## Environment
 Once the environment is up and running, both Kong Manager and the Admin API can be accessed on localhost for testing
 Manager or the Admin API:
+Manager: http://localhost:8002
+Admin API: http://localhost:8001
+Proxy: http://localhost:8000
 ![manager](./image/browse-saml-plugin.png)
 
