@@ -4,7 +4,7 @@ The purpose of this plugn is to:
 - Add a header on the request (before be sent to the backend): x-saml-auth-req
 - Add a header on the response (sent to the API Consumer): x-saml-auth-res
 
-![manager](./image/saml-auth-puginh-result.png)
+![manager](./image/saml-auth-plugin-result.png)
 
 ## Prepare Kong environment : Docker network and PostgreSQL (start & prepare PostgreSQL)
 1) Create a custom Docker network to allow the containers to discover and communicate with each other
