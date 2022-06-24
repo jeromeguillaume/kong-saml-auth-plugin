@@ -1,5 +1,6 @@
 # custom-plugins
-Init repo for setting up custom plugin in Go
+Init repository for setting up custom plugin in Go
+
 The purpose of this plugn is to:
 - Add a header on the request (before be sent to the backend): x-saml-auth-req
 - Add a header on the response (sent to the API Consumer): x-saml-auth-res
