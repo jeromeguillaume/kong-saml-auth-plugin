@@ -8,6 +8,15 @@ The purpose of this plugn is to:
 See example below with the Endpoint http://httpbin.org/anything and the saml-auth plugin enabled
 ![manager](./image/saml-auth-plugin-result.png)
 
+#
+## Documentation
+Overall Kong plugin documentation:
+https://docs.konghq.com/gateway/latest/reference/external-plugins/
+
+Kong Plugin Development Kit - Go: 
+https://pkg.go.dev/github.com/Kong/go-pdk
+#
+
 ## Prepare Kong environment : Docker network,  PostgreSQL (start & prepare PostgreSQL) and License
 1) Create a custom Docker network to allow the containers to discover and communicate with each other
 ``` 
