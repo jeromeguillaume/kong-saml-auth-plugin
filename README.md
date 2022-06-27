@@ -5,7 +5,7 @@ The purpose of this plugn is to:
 - Add a header on the request (before be sent to the Producer/backend): x-saml-auth-req
 - Add a header on the response (sent to the API Consumer): x-saml-auth-res
 
-See example below with the Endpoint http://httpbin.org/anything and the saml-auth plugin enabled
+See example below with the Producer API http://httpbin.org/anything and the saml-auth plugin enabled
 ![manager](./image/saml-auth-plugin-result.png)
 
 #
