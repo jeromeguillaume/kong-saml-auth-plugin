@@ -32,8 +32,8 @@ func New() interface{} {
 }
 
 //-----------------------------------------------------------------------------
-// Access => Executed for every request from a client and before it is being 
-// proxied to the upstream service
+// Access => Executed for every request from a Client and before it is being 
+// proxied to the upstream service (i.e. producer)
 //-----------------------------------------------------------------------------
 func (conf Config) Access(kong *pdk.PDK) {
 	
@@ -53,30 +53,31 @@ func (conf Config) Access(kong *pdk.PDK) {
 	if message == "" {
 		message = "hello"
 	}
-	
-	// Prepare the response sent to the Consumer: add a header in the response 
+
+	// In early stage we add a header in the response sent to the Consumer
 	kong.Response.SetHeader("x-saml-auth-res", fmt.Sprintf("Go says %s to %s", message, host))
 
+	/* In case of issue in this function, we can setup an error (503 - PDK custom error)
+	   by calling Exit(503, ...) and the producer is NOT called
+
+	respHeaders := make(map[string][]string)
+	respHeaders["Content-Type"] = append(respHeaders["Content-Type"], "text/plain")
+	kong.Log.Notice("*** saml-auth - End Access() ***")
+	kong.Response.Exit(503, "PDK custom error", respHeaders)
+	*/
 	kong.Log.Notice("*** saml-auth - End Access() ***")
 }
 
 //-----------------------------------------------------------------------------
 // Response => Executed after the whole response has been received from the 
-// upstream service, but before sending any part of it to the client
+// upstream service (i.e. Producer), but before sending any part of it to 
+// the Client
 //-----------------------------------------------------------------------------
 func (conf Config) Response(kong *pdk.PDK) {
 	kong.Log.Notice("*** saml-auth - Begin Response() ***")
 	
-	// Add a 2nd header in the response 
+	// Add a 2nd header in the response
 	kong.Response.SetHeader("x-saml-auth-res2", fmt.Sprintf("2nd Header"))
 	
-	/*
-	mapHeaders, err := kong.Response.GetHeaders(-1)
-	if err != nil {
-		kong.Log.Err("Error reading 'GetHeaders': %s", err.Error())	
-	}
-	kong.Response.Exit(599, "PDK custom error", mapHeaders)
-	*/
-
 	kong.Log.Notice("*** saml-auth - End Response() ***")
 }
