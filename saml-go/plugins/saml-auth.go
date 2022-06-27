@@ -10,9 +10,12 @@ package main
 
 import (
 	"fmt"
+	"bytes"
 	
 	"github.com/Kong/go-pdk"
 	"github.com/Kong/go-pdk/server"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/valyala/fasthttp"
 )
 
 func main() {
@@ -25,10 +28,85 @@ var Priority = 1
 // Property of the Plugin
 type Config struct {
 	Message string
+	Fv_oauth_server string
+	Message2 string
 }
 
 func New() interface{} {
 	return &Config{}
+}
+
+//-----------------------------------------------------------------------------
+// sapGetAccessToken => Get Access Token
+//-----------------------------------------------------------------------------
+func sapGetAccessToken(	kong *pdk.PDK, 
+						conf Config, 
+						fv_b64_authorization string, 
+						fv_oauth_client string, 
+						fv_odata_scope string, 
+						fv_b64_assertion string) {
+	
+	kong.Log.Notice("*** saml-auth - Begin sapGetAccessToken() ***")
+
+    req := fasthttp.AcquireRequest()
+    defer fasthttp.ReleaseRequest(req)
+	
+	// Get fv_oauth_server value from Plugin property
+	fv_oauth_server := conf.Fv_oauth_server
+
+    req.SetRequestURI("https://" + fv_oauth_server + "/sap/bc/sec/oauth2/token")
+    
+	// Send a POST
+	req.Header.SetMethod("POST")
+	
+	// Add Headers for SAP
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+    req.Header.Set("Charset", "UTF-8")
+	req.Header.Set("User-Agent", "KongProxy")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Authorization", "Basic " + fv_b64_authorization)
+	
+	// Add Form Parameters for SAP
+	req.SetBodyString(	"client_id=" 	+ fv_oauth_client 	+ "&" +
+						"scope=" 		+ fv_odata_scope	+ "&" +
+						"grant_type=urn:ietf:params:oauth:grant-type:saml2-bearer" + "&" +
+						"assertion=" + fv_b64_assertion)
+	
+	Ok := true
+	resp := fasthttp.AcquireResponse()
+    defer fasthttp.ReleaseResponse(resp)
+	
+    // Perform the request
+    err := fasthttp.Do(req, resp)
+    if Ok && err != nil {
+        kong.Log.Err(err.Error())
+		Ok = false;
+    }
+    if Ok && resp.StatusCode() != fasthttp.StatusOK {
+        kong.Log.Err(fmt.Sprintf("Expected status code %d but got %d", fasthttp.StatusOK, resp.StatusCode()))
+        Ok = false;
+    }
+
+    // Verify the content type
+    contentType := resp.Header.Peek("Content-Type")
+    if Ok && bytes.Index(contentType, []byte("application/json")) != 0 {
+        kong.Log.Err(fmt.Sprintf("Expected content type application/json but got %s", contentType))
+        Ok = false;
+    }
+
+    // Do we need to decompress the response?
+	if Ok{
+		contentEncoding := resp.Header.Peek("Content-Encoding")
+		var body []byte
+		if bytes.EqualFold(contentEncoding, []byte("gzip")) {
+			body, _ = resp.BodyGunzip()
+		} else {
+			body = resp.Body()
+		}
+		kong.Log.Notice(fmt.Sprintf("Response body is: %s", body))
+	}
+	kong.Log.Notice("*** saml-auth - End sapGetAccessToken() ***")
 }
 
 //-----------------------------------------------------------------------------
@@ -47,6 +125,34 @@ func (conf Config) Access(kong *pdk.PDK) {
 
 	// Add a header in the request before to call the Backend
 	kong.ServiceRequest.AddHeader("x-saml-auth-req","test")
+
+	// token handling
+	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJleHAiOjE1MDAwLCJpc3MiOiJ0ZXN0In0.HE7fK0xOQwFEr4WDgRWj4teRPZ6i3GLwD5YCm6Pwu_c"
+	type MyCustomClaims struct {
+		Foo string `json:"foo"`
+		Iss string `json:"iss"`
+		jwt.StandardClaims
+	}
+	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("AllYourBase"), nil
+	})
+	kong.Log.Notice(fmt.Sprintf("*** saml-auth token=%s ***", token))
+	claims, ok := token.Claims.(*MyCustomClaims)
+	kong.Log.Notice(fmt.Sprintf("*** saml-auth foo='%v' iss='%v' exp='%v'", claims.Foo, claims.Iss, claims.StandardClaims.ExpiresAt))
+	if ok {}
+	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		kong.Log.Notice(fmt.Sprintf("%v %v", claims.Foo, claims.Iss, claims.StandardClaims.ExpiresAt))
+	} else {
+		kong.Log.Err(err)
+	}
+
+	// sap-get-access-token
+	sapGetAccessToken(	kong, 
+						conf,
+						"fv_b64_authorization",
+						"fv_oauth_client",
+						"fv_odata_scope",
+						"fv_b64_assertion")
 
 	// Get message value from Plugin property
 	message := conf.Message
