@@ -50,9 +50,9 @@ Note: The following license is only an example. You must use the following forma
 ```
 
 ## Build Kong gateway image with Go custom plugin
-Build Kong Gateway from project root with name as richemont/kong-gateway-saml (note the trailing .)
+Build Kong Gateway from project root with name as kong-gateway-saml (note the trailing .)
 ```
-docker build -t richemont/kong-gateway-saml .
+docker build -t kong-gateway-saml .
 ```
 ## Run Kong gateway container with Go custom plugin
 Start Kong Gateway

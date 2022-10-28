@@ -1,8 +1,8 @@
-# docker build -t richemont/kong-gateway-saml .
-FROM kong/kong-gateway:2.8.1.1-alpine
+# docker build -t kong-gateway-saml .
+FROM kong/kong-gateway:3.0.0.0-alpine
 USER root
 
-RUN apk update && apk add nodejs npm go musl-dev libffi-dev gcc g++ file make \
+RUN apk update && apk add git nodejs npm go musl-dev libffi-dev gcc g++ file make \
 && npm install kong-pdk -g 
 
 # Example for GO:
@@ -15,7 +15,9 @@ RUN go mod download
 
 WORKDIR /saml-go/plugins
 COPY /saml-go/plugins/saml-auth.go .
-RUN go build -o /usr/local/bin/ saml-auth.go
+#RUN go build -o /usr/local/bin/ saml-auth.go
+RUN go build saml-auth.go
+RUN mv /saml-go/plugins/saml-auth /usr/local/bin/
 
 COPY kong.conf /etc/kong/.
 

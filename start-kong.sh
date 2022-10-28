@@ -1,3 +1,5 @@
+docker rm -f kong-gateway-saml
+
 docker run -d --name kong-gateway-saml \
 --network=kong-net \
 --link kong-database-saml:kong-database-saml \
@@ -17,4 +19,6 @@ docker run -d --name kong-gateway-saml \
 -p 8001:8001 \
 -p 8002:8002 \
 -p 8444:8444 \
-richemont/kong-gateway-saml
+kong-gateway-saml
+
+echo "see logs 'docker logs kong-gateway-saml -f'"
