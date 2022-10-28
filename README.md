@@ -39,7 +39,7 @@ docker run --rm --network=kong-net \
   -e "KONG_PG_HOST=kong-database-saml" \
   -e "KONG_PG_PASSWORD=kongpass" \
   -e "KONG_PASSWORD=test" \
- kong/kong-gateway:2.8.1.1-alpine kong migrations bootstrap
+ kong/kong-gateway:3.0.0.0-alpine kong migrations bootstrap
 ```
 4) Export the Kong EE licence
 
