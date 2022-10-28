@@ -50,7 +50,7 @@ func (conf Config) Access(kong *pdk.PDK) {
 	kong.ServiceRequest.AddHeader("x-saml-auth-req", "test")
 
 	// In early stage we add a header in the response sent to the Consumer
-	kong.Response.SetHeader("x-saml-auth-res", fmt.Sprintf("Go says %s to %s", conf.Message, host))
+	kong.Response.SetHeader("x-saml-auth-res", fmt.Sprintf("Go says '%s' to %s", conf.Message, host))
 
 	/* In case of issue in this function, we can setup an error (503 - PDK custom error)
 	   by calling Exit(503, ...) and the producer is NOT called
